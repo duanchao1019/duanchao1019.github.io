@@ -6,13 +6,17 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives: 2021/6 | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="C++ vector 的扩容机制是什么？   新增元素：vector通过一个连续的数组存放元素，如果数组已满，在新增数据的时候，就要分配一块两倍大的内存，将原来的数据复制过来，释放之前的内存，再插入新增的元素；  为什么是两倍扩容，而不是三倍或者四倍呢？或者为什么不是一次增加一个固定的大小呢？ ​                采用成倍方式扩容，在均摊后可以达到常数的时间复杂度，而增加指定大小的容">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/2021/06/index.html">
+<meta property="og:url" content="http://example.com/2021/06/24/C++/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="C++ vector 的扩容机制是什么？   新增元素：vector通过一个连续的数组存放元素，如果数组已满，在新增数据的时候，就要分配一块两倍大的内存，将原来的数据复制过来，释放之前的内存，再插入新增的元素；  为什么是两倍扩容，而不是三倍或者四倍呢？或者为什么不是一次增加一个固定的大小呢？ ​                采用成倍方式扩容，在均摊后可以达到常数的时间复杂度，而增加指定大小的容">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-06-24T13:49:53.784Z">
+<meta property="article:modified_time" content="2021-06-19T14:07:51.518Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
   
@@ -150,118 +154,273 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-C++" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="C"><a href="#C" class="headerlink" title="C++"></a>C++</h1><ol>
+<li><strong>vector 的扩容机制是什么？</strong></li>
+</ol>
+<ul>
+<li><p>新增元素：vector通过一个连续的数组存放元素，如果数组已满，在新增数据的时候，就要分配一块两倍大的内存，将原来的数据复制过来，释放之前的内存，再插入新增的元素；</p>
+</li>
+<li><p>为什么是两倍扩容，而不是三倍或者四倍呢？或者为什么不是一次增加一个固定的大小呢？</p>
+<p>​                采用成倍方式扩容，在均摊后可以达到常数的时间复杂度，而增加指定大小的容量只能达到0(n)的时间复杂度，因此采用成倍方式扩容。</p>
+<p>​                在成倍扩容中，考虑可能产生的堆空间浪费，成倍增长倍数不能太大，故使用2倍或者1.5倍扩容。；</p>
+</li>
+<li><p>简单来说就是，每次扩容时空间分配得多，平摊下来的时间复杂度就低，但是浪费的空间也多，为了兼顾时间与空间效率，所以取一个较小的增长倍数；</p>
+</li>
+<li><p>对vector的任何操作，一旦引起空间重新配置，指向原来vector的所有迭代器就全部失效；</p>
+</li>
+<li><p>初始时刻vector的capacity为0，塞入第一个元素之后capacity增加为1；</p>
+</li>
+<li><p>*不同的编译器实现的扩容方式不一样，VS2015中以1.5倍扩容，GCC以2倍扩容；</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>vector 在哪些情况下会导致迭代器失效？</strong></li>
+</ol>
+<ul>
+<li>当插入（push_back）一个元素后，end操作返回的迭代器肯定失效；</li>
+<li>当插入（push_back）一个元素后，capacity返回值与没有插入元素之前相比有改变，则需要重新加载整个容器，此时first和end操作返回的迭代器都会失效；</li>
+<li>当进行删除（erase，pop_back）操作后，指向删除点的迭代器全部失效，指向删除点后面的元素的迭代器也将全部失效。</li>
+</ul>
+<ol start="3">
+<li><strong>多态的概念与实现原理？</strong></li>
+</ol>
+<p>（1）多态的概念</p>
+<ul>
+<li>静态多态：就是重载，因为在编译期就可以确定，所以成为静态多态，在编译时就可以确定函数地址；</li>
+<li>动态多态：通过继承重写基类的虚函数实现的多态，因为要在运行时才能确定，所以称为动态多态，运行时在虚函数表中寻找调用函数的地址。</li>
+</ul>
+<p>（2）多态的实现原理</p>
+<p>一个接口，多种方法。</p>
+<ul>
+<li>用virtual关键字申明的函数叫做虚函数，虚函数肯定是类的成员函数；</li>
+<li>存在虚函数的类都有一个一维的虚函数表叫虚表，当类中声明虚函数时，编译器会在类中生成一个虚函数表；</li>
+<li>类的对象有一个指向虚表开始的虚指针，虚表是和类对应的，虚表指针是和对象对应的；</li>
+<li>虚函数表是一个存储类成员函数指针的数据结构；</li>
+<li>虚函数表是由编译器自动生成与维护的；</li>
+<li>virtual成员函数会被编译器放入虚函数表中；</li>
+<li>当存在虚函数时，每个对象中都有一个指向虚函数的指针，C++编译器给父类对象，子类对象提前布局vptr指针，当进行test(parent *base)函数的时候，C++编译器不需要区分子类或者父类对象，只需要再base指针中，找到vptr指针即可；</li>
+<li>vptr一般作为类对象的第一个成员。</li>
+</ul>
+<ol start="4">
+<li><strong>构造函数和析构函数可以是虚函数吗？</strong></li>
+</ol>
+<ul>
+<li>构造函数不可以是虚函数，因为虚函数的调用需要虚函数表指针，而该指针存放在对象的内存空间中，若构造函数声明为虚函数，那么由于对象还未创建，还没有内存空间，更没有虚函数表地址用来调用虚函数——构造函数了。</li>
+<li>析构函数可以是虚函数，而且当要使用基类指针或引用调用子类时，最好将基类的析构函数声明为虚函数，否则可能存在内存泄露的问题。</li>
+</ul>
+<ol start="5">
+<li><strong>unordered_map 与 map 的区别？</strong></li>
+</ol>
+<ul>
+<li>unordered_map属于无序容器，其内的每个元素的顺序无关紧要，重要的是某特定元素是否位于此集合内，而且元素的顺序有可能随着时间而发生改变，STL内含4个预定义的无序容器：unordered_map、unordered_set、unordered_multimap、unordered_multiset</li>
+<li>map属于关联式容器，这是一种已排序的集合，元素位置取决于其value（或者key，如果元素是key/value pair的话）和给定的某个排序准则，顺序和插入顺序无关，STL提供了4个关联式容器：set、multiset、map、multimap</li>
+<li>由于unordered_map的操作属于摊还式常量（amortized constant）复杂度，map提供的则是对数复杂度，所以通常使用unordered_map，除非需要排序。</li>
+</ul>
+<ol start="6">
+<li><strong>vector 的迭代器什么时候会失效？</strong></li>
+</ol>
+<ul>
+<li>vector中安插和删除元素后，作用点之后的元素的迭代器、指针和引用全部失效；</li>
+<li>当vector中容量已满时，此时安插元素会导致原先vector中的全部的迭代器、指针、引用全部失效；</li>
+<li>shrink_to_fit和reserve都会使vector中所有的迭代器、指针和引用全部失效。</li>
+</ul>
+<ol start="7">
+<li><strong>静态库和动态库（共享库）的优缺点是什么？</strong></li>
+</ol>
+<ul>
+<li>静态库</li>
+</ul>
+<ol>
+<li>优点：发布程序的时候，不需要提供对应的库；加载库的速度快；</li>
+<li>缺点：库被打包到应用程序中，导致应用程序体积变大；库发生改变时，需要重新编译；</li>
+</ol>
+<ul>
+<li>动态库</li>
+</ul>
+<ol>
+<li>优点：内存中只有一份动态库，且不包含在应用程序的地址空间中，应用程序运行时通过动态链接器取加载动态库，应用程序的体积小；动态库更新时，不需要重新编译程序（前提是函数的接口没有变）；</li>
+<li>缺点：发布程序的时候，需要将动态库提供给用户；动态库没有被打包到应用程序中，程序加载速度相对较慢。</li>
+</ol>
+<ol start="8">
+<li><strong>strlen 和 sizeof 的区别是什么？</strong></li>
+</ol>
+<ul>
+<li>strlen 计算不包含终止 null 的字符串的长度，sizeof 计算包括终止 null 字节的缓冲区长度；</li>
+<li>strlen 需进行一次函数调用，而对于 sizeof 而言，因为缓冲区已用已知字符串进行初始化，其长度是固定的，所以 sizeof 是在编译时计算缓冲区长度，不包含函数调用。</li>
+</ul>
+<ol start="9">
+<li><strong>模板的作用是什么？解决了什么问题？</strong></li>
+</ol>
+<ul>
+<li>使用模板是为了实现泛型，可以减轻编程的工作量，提高代码的复用性。</li>
+<li>解决了代码重复的问题。</li>
+</ul>
+<ol start="10">
+<li><strong>虚函数的作用是什么？</strong></li>
+</ol>
+<ul>
+<li>实现多态性，从而将接口与实现进行分离，具体来说就是可以通过基类指针或引用来访问基类和派生类中的同名函数。</li>
+</ul>
+<ol start="11">
+<li><strong>C语言的 malloc 和C++中的 new 有什么区别？</strong></li>
+</ol>
+<ul>
+<li>new 、delete 是操作符，可以重载，只能在C++中使用；</li>
+<li>malloc 、free 是函数，可以覆盖，C 、C++ 中都可以使用；</li>
+<li>new 可以调用对象的构造函数，对应的 delete 调用相应的析构函数；</li>
+<li>malloc 仅仅分配内存，free 仅仅回收内存，并不执行构造和析构函数；</li>
+<li>new 、delete 返回的是某种数据类型的指针，malloc 、free 返回的是 void 指针。</li>
+</ul>
+<ol start="12">
+<li><strong>C语言的关键字 static 和 C++ 的关键字 static 有什么区别？</strong></li>
+</ol>
+<ul>
+<li>在 C 中 static 用来修饰静态局部变量或者静态全局变量和静态函数，而 C++ 中除了上述功能外，还用来定义类的成员变量和函数，即静态成员和静态成员函数。</li>
+<li>使用了 static 修饰的全局变量只能在本文件中使用，未使用 static 修饰的全局变量可以在其他文件中用 extern 声明后使用；使用了 static 修饰的函数只能在本文件中使用，未使用 static 修饰的函数可以直接在其他文件中使用且不必使用 extren 声明。</li>
+</ul>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/24/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="archive-article-date">
-  	<time datetime="2021-06-24T13:49:53.820Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-24</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/06/24/C++/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/24/C++/" class="archive-article-date">
-  	<time datetime="2021-06-24T13:49:53.784Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-24</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/23/hello-world/" class="archive-article-date">
-  	<time datetime="2021-06-23T14:29:32.859Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-23</time>
-</a>
-        </div>
-    	 
+<nav id="article-nav">
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/06/23/hello-world/">Hello World</a>
-    </h1>
+    <a href="/2021/06/24/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
   
+  
+    <a href="/2021/06/23/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Hello World</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/23/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/" class="archive-article-date">
-  	<time datetime="2021-06-23T14:00:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-23</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/06/23/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/">我的第一篇博客文章</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
+  
+
+  
 
 
           </div>
@@ -284,8 +443,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
